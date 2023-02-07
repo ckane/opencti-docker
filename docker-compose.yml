@@ -122,7 +122,7 @@ services:
         condition: service_healthy
     deploy:
       mode: replicated
-      replicas: 3
+      replicas: 6
     restart: always
   connector-export-file-stix:
     image: opencti/connector-export-file-stix:6.3.5
