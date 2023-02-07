@@ -532,6 +532,30 @@ services:
     restart: always
     depends_on:
       - opencti
+  connector-export-report-pdf:
+    image: opencti/connector-export-report-pdf:5.5.3
+    environment:
+      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
+      - CONNECTOR_ID=${CONNECTOR_EXPORT_PDF_ID} # Valid UUIDv4
+      - CONNECTOR_TYPE=INTERNAL_EXPORT_FILE
+      - "CONNECTOR_NAME=Export PDF Report"
+      - CONNECTOR_SCOPE=application/pdf
+      - CONNECTOR_CONFIDENCE_LEVEL=100 # From 0 (Unknown) to 100 (Fully trusted)
+      - CONNECTOR_LOG_LEVEL=info
+      - EXPORT_REPORT_PDF_PRIMARY_COLOR=#ff8c00 # The primary color for the output pdf
+      - EXPORT_REPORT_PDF_SECONDARY_COLOR=#000000 # The secondary color for the output pdf
+      - EXPORT_REPORT_PDF_COMPANY_ADDRESS_LINE_1=${EXPORT_PDF_ADDRESS1} # The first line of your company address
+      - EXPORT_REPORT_PDF_COMPANY_ADDRESS_LINE_2=${EXPORT_PDF_ADDRESS2}
+      - EXPORT_REPORT_PDF_COMPANY_ADDRESS_LINE_3=${EXPORT_PDF_ADDRESS3}
+      - EXPORT_REPORT_PDF_COMPANY_PHONE_NUMBER=${EXPORT_PDF_PHONE} # The phone number of your company
+      - EXPORT_REPORT_PDF_COMPANY_EMAIL=${EXPORT_PDF_EMAIL} # The email of your company
+      - EXPORT_REPORT_PDF_COMPANY_WEBSITE=${EXPORT_PDF_URL} # The website of your company
+      - EXPORT_REPORT_PDF_INDICATORS_ONLY=false # Whether or not to only include Observables that are Indicators in the report
+      - EXPORT_REPORT_PDF_DEFANG_URLS=false # Replace http in Url observables with hxxp
+    restart: always
+    depends_on:
+      - opencti
 
 volumes:
   esdata:
