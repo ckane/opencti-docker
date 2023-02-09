@@ -552,6 +552,24 @@ services:
     restart: always
     depends_on:
       - opencti
+  connector-shodan-internetdb:
+    image: opencti/connector-shodan-internetdb:5.5.4
+    environment:
+      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
+      - CONNECTOR_ID=${CONNECTOR_SHODAN_INTERNETDB_ID} # Valid UUIDv4
+      - CONNECTOR_TYPE=INTERNAL_ENRICHMENT
+      - CONNECTOR_NAME=Shodan InternetDB
+      - CONNECTOR_SCOPE=IPv4-Addr
+      - CONNECTOR_CONFIDENCE_LEVEL=75
+      - CONNECTOR_AUTO=true
+      - CONNECTOR_LOG_LEVEL=info
+      - SHODAN_MAX_TLP=white
+      - SHODAN_SSL_VERIFY=true
+    restart: always
+    depends_on:
+      - opencti
+
 
 volumes:
   esdata:
