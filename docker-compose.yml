@@ -62,6 +62,7 @@ services:
       - APP__APP_LOGS__LOGS_LEVEL=error
       - REDIS__HOSTNAME=redis
       - REDIS__PORT=6379
+      - REDIS__TRIMMING=2000000
       - ELASTICSEARCH__URL=http://elasticsearch:9200
       - MINIO__ENDPOINT=${S3_ENDPOINT}
       - MINIO__PORT=443
