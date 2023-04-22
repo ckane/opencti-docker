@@ -216,7 +216,7 @@ services:
       - CONNECTOR_ONLY_CONTEXTUAL=false # Only extract data related to an entity (a report, a threat actor, etc.)
       - CONNECTOR_LOG_LEVEL=info
   connector-opencti:
-    image: opencti/connector-opencti:5.6.2
+    image: opencti/connector-opencti:5.7.2
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -259,7 +259,7 @@ services:
         condition: service_healthy
     restart: always
   connector-mitre:
-    image: opencti/connector-mitre:5.6.2
+    image: opencti/connector-mitre:5.7.2
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -280,7 +280,7 @@ services:
     depends_on:
       - opencti
   connector-disarm-framework:
-    image: opencti/connector-disarm-framework:5.6.2
+    image: opencti/connector-disarm-framework:5.7.2
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -298,7 +298,7 @@ services:
     depends_on:
       - opencti
   connector-cisa-known-exploited-vulnerabilities:
-    image: opencti/connector-cisa-known-exploited-vulnerabilities:5.6.2
+    image: opencti/connector-cisa-known-exploited-vulnerabilities:5.7.2
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -317,7 +317,7 @@ services:
     depends_on:
       - opencti
   connector-cve:
-    image: opencti/connector-cve:5.6.2
+    image: opencti/connector-cve:5.7.2
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -338,7 +338,7 @@ services:
     depends_on:
       - opencti
   connector-malpedia:
-    image: opencti/connector-malpedia:5.6.2
+    image: opencti/connector-malpedia:5.7.2
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -359,7 +359,7 @@ services:
     depends_on:
       - opencti
   connector-cybercrimetracker:
-    image: opencti/connector-cybercrime-tracker:5.6.2
+    image: opencti/connector-cybercrime-tracker:5.7.2
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -379,7 +379,7 @@ services:
     depends_on:
       - opencti
   connector-misp-feed-botvrij:
-    image: opencti/connector-misp-feed:5.6.2
+    image: opencti/connector-misp-feed:5.7.2
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -407,7 +407,7 @@ services:
     depends_on:
       - opencti
   connector-misp-feed-circl:
-    image: opencti/connector-misp-feed:5.6.2
+    image: opencti/connector-misp-feed:5.7.2
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -435,7 +435,7 @@ services:
     depends_on:
       - opencti
   connector-misp-feed-threatfox:
-    image: opencti/connector-misp-feed:5.6.2
+    image: opencti/connector-misp-feed:5.7.2
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -463,7 +463,7 @@ services:
     depends_on:
       - opencti
   connector-cryptolaemus:
-    image: opencti/connector-cryptolaemus:5.6.2
+    image: opencti/connector-cryptolaemus:5.7.2
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -478,7 +478,7 @@ services:
     depends_on:
       - opencti
   connector-urlhaus:
-    image: opencti/connector-urlhaus:5.6.2
+    image: opencti/connector-urlhaus:5.7.2
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -498,7 +498,7 @@ services:
     depends_on:
       - opencti
   connector-valhalla:
-    image: opencti/connector-valhalla:5.6.2
+    image: opencti/connector-valhalla:5.7.2
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -515,7 +515,7 @@ services:
     depends_on:
       - opencti
   connector-vxvault:
-    image: opencti/connector-vxvault:5.6.2
+    image: opencti/connector-vxvault:5.7.2
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -533,7 +533,7 @@ services:
     depends_on:
       - opencti
   connector-export-report-pdf:
-    image: opencti/connector-export-report-pdf:5.6.2
+    image: opencti/connector-export-report-pdf:5.7.2
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -557,7 +557,7 @@ services:
     depends_on:
       - opencti
   connector-malware-bazaar-recent-additions:
-    image: opencti/connector-malwarebazaar-recent-additions:5.6.2
+    image: opencti/connector-malwarebazaar-recent-additions:5.7.2
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -576,7 +576,7 @@ services:
     depends_on:
       - opencti
   connector-shodan-internetdb:
-    image: opencti/connector-shodan-internetdb:5.6.2
+    image: opencti/connector-shodan-internetdb:5.7.2
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -593,7 +593,7 @@ services:
     depends_on:
       - opencti
   connector-hygiene:
-    image: opencti/connector-hygiene:5.6.2
+    image: opencti/connector-hygiene:5.7.2
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -609,7 +609,27 @@ services:
     restart: always
     depends_on:
       - opencti
-
+  connector-greynoise:
+    image: opencti/connector-greynoise:5.7.2
+    environment:
+      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
+      - CONNECTOR_ID=${CONNECTOR_GREYNOISE_ID}
+      - CONNECTOR_TYPE=INTERNAL_ENRICHMENT
+      - CONNECTOR_NAME=GreyNoise
+      - CONNECTOR_SCOPE=IPv4-Addr
+      - CONNECTOR_AUTO=true
+      - CONNECTOR_CONFIDENCE_LEVEL=80 # From 0 (Unknown) to 100 (Fully trusted)
+      - CONNECTOR_LOG_LEVEL=info
+      - GREYNOISE_KEY=${CONNECTOR_GREYNOISE_APIKEY}
+      - GREYNOISE_MAX_TLP=TLP:AMBER
+      - GREYNOISE_NAME=GreyNoise
+      - "GREYNOISE_DESCRIPTION=GreyNoise collects and analyzes untargeted, widespread, and opportunistic scan and attack activity that reaches every server directly connected to the Internet."
+      - GREYNOISE_SIGHTING_NOT_SEEN=false
+      - GREYNOISE_SPOOFABLE_CONFIDENCE_LEVEL=30
+    restart: always
+    depends_on:
+      - opencti
 
 volumes:
   esdata:
