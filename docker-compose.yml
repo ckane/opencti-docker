@@ -653,7 +653,7 @@ services:
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
-      - CONNECTOR_ID=${CONNECTOR_GOOGLE_DNS}
+      - CONNECTOR_ID=${CONNECTOR_GOOGLE_DNS_ID}
       - CONNECTOR_TYPE=INTERNAL_ENRICHMENT
       - CONNECTOR_NAME=Google DNS
       - CONNECTOR_SCOPE=Domain-Name # MIME type or Stix Object
