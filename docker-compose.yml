@@ -698,6 +698,28 @@ services:
     restart: always
     depends_on:
       - opencti
+  connector-tweetfeed:
+    image: opencti/connector-tweetfeed:5.10.2
+    environment:
+      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
+      - CONNECTOR_ID=${CONNECTOR_TWEETFEED_ID}
+      - CONNECTOR_TYPE=EXTERNAL_IMPORT
+      - CONNECTOR_NAME=Tweetfeed
+      - CONNECTOR_SCOPE=tweetfeed
+      - CONNECTOR_CONFIDENCE_LEVEL=15
+      - CONNECTOR_LOG_LEVEL=error
+      - TWEETFEED_CONFIDENCE_LEVEL=15 # From 0 (Unknown) to 100 (Fully trusted)
+      - TWEETFEED_CREATE_INDICATORS=true
+      - TWEETFEED_CREATE_OBSERVABLES=true
+      - TWEETFEED_INTERVAL=1
+      - TWEETFEED_UPDATE_EXISTING_DATA=true
+      - "TWEETFEED_ORG_DESCRIPTION=Tweetfeed, a connector to import IOC from Twitter."
+      - TWEETFEED_ORG_NAME=Tweetfeed
+      - TWEETFEED_DAYS_BACK_IN_TIME=365 # Number of days to retrieve data back in time
+    restart: always
+    depends_on:
+      - opencti
 
 volumes:
   esdata:
