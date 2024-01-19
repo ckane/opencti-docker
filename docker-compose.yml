@@ -738,6 +738,20 @@ services:
     restart: always
     depends_on:
       - opencti
+  connector-export-ttps-file-navigator:
+    image: opencti/connector-export-ttps-file-navigator:${OPENCTI_VERSION}
+    environment:
+      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
+      - CONNECTOR_ID=${CONNECTOR_EXPORT_TTPS_FILE_NAVIGATOR}
+      - CONNECTOR_TYPE=INTERNAL_EXPORT_FILE
+      - CONNECTOR_NAME=ExportTTPsFileNavigator
+      - CONNECTOR_SCOPE=application/vnd.mitre.navigator+json
+      - CONNECTOR_CONFIDENCE_LEVEL=100 # From 0 (Unknown) to 100 (Fully trusted)
+      - CONNECTOR_LOG_LEVEL=error
+    restart: always
+    depends_on:
+      - opencti
 
 volumes:
   esdata:
