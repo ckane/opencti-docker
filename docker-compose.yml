@@ -65,7 +65,7 @@ services:
       - APP__APP_LOGS__LOGS_LEVEL=info
       - REDIS__HOSTNAME=dragonfly
       - REDIS__PORT=6379
-      - REDIS__TRIMMING=100000
+      - REDIS__TRIMMING=${REDIS_TRIMMING}
       - ELASTICSEARCH__URL=http://elasticsearch:9200
       - ELASTICSEARCH__MAX_CONCURRENCY=50
       - MINIO__ENDPOINT=${S3_ENDPOINT}
@@ -106,7 +106,7 @@ services:
       - APP__APP_LOGS__LOGS_LEVEL=error
       - REDIS__HOSTNAME=dragonfly
       - REDIS__PORT=6379
-      - REDIS__TRIMMING=2000000
+      - REDIS__TRIMMING=${REDIS_TRIMMING}
       - ELASTICSEARCH__URL=http://elasticsearch:9200
       - MINIO__ENDPOINT=${S3_ENDPOINT}
       - MINIO__PORT=443
