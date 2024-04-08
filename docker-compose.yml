@@ -1,10 +1,13 @@
 version: '3'
 services:
-  redis:
-    image: redis:7.2.5
+  dragonfly:
+    image: docker.dragonflydb.io/dragonflydb/dragonfly:v1.16.1
     restart: always
+    command:  --dbfilename dump --port 6379 --logtostderr --keys_output_limit 1000000 --max_client_iobuf_len 104857600 --max_multi_bulk_len 104857600 --snapshot_cron "0 * * * *"
+    ulimits:
+      memlock: -1
     volumes:
-      - redisdata:/data
+      - dfdata:/data
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
     volumes:
@@ -46,7 +49,7 @@ services:
       - APP__ADMIN__PASSWORD=${OPENCTI_ADMIN_PASSWORD}
       - APP__ADMIN__TOKEN=${OPENCTI_ADMIN_TOKEN}
       - APP__APP_LOGS__LOGS_LEVEL=error
-      - REDIS__HOSTNAME=redis
+      - REDIS__HOSTNAME=dragonfly
       - REDIS__PORT=6379
       - REDIS__TRIMMING=2000000
       - ELASTICSEARCH__URL=http://elasticsearch:9200
@@ -69,7 +72,7 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - redis
+      - dragonfly
       - elasticsearch
       - rabbitmq
     restart: always
@@ -770,6 +773,6 @@ services:
 volumes:
   esdata:
   s3data:
-  redisdata:
+  dfdata:
   amqpdata:
 
