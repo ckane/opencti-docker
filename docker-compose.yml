@@ -53,11 +53,52 @@ services:
       interval: 30s
       timeout: 30s
       retries: 3
+  opencti-int:
+    image: opencti/platform:${OPENCTI_VERSION}
+    environment:
+      - NODE_OPTIONS=--max-old-space-size=8096
+      - APP__PORT=8070
+      - APP__BASE_URL=${OPENCTI_BASE_URL}
+      - APP__ADMIN__EMAIL=${OPENCTI_ADMIN_EMAIL}
+      - APP__ADMIN__PASSWORD=${OPENCTI_ADMIN_PASSWORD}
+      - APP__ADMIN__TOKEN=${OPENCTI_ADMIN_TOKEN}
+      - APP__APP_LOGS__LOGS_LEVEL=info
+      - REDIS__HOSTNAME=dragonfly
+      - REDIS__PORT=6379
+      - REDIS__TRIMMING=100000
+      - ELASTICSEARCH__URL=http://elasticsearch:9200
+      - ELASTICSEARCH__MAX_CONCURRENCY=50
+      - MINIO__ENDPOINT=${S3_ENDPOINT}
+      - MINIO__PORT=443
+      - MINIO__USE_SSL=true
+      - MINIO__USE_AWS_ROLE=true
+      - MINIO__ACCESS_KEY=
+      - MINIO__SECRET_KEY=
+      - MINIO__BUCKET_NAME=${S3_BUCKET}
+      - RABBITMQ__HOSTNAME=rabbitmq
+      - RABBITMQ__PORT=5672
+      - RABBITMQ__PORT_MANAGEMENT=15672
+      - RABBITMQ__MANAGEMENT_SSL=false
+      - RABBITMQ__USERNAME=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ__PASSWORD=${RABBITMQ_DEFAULT_PASS}
+      - SMTP__HOSTNAME=${SMTP_HOSTNAME}
+      - SMTP__PORT=25
+      - PROVIDERS__LOCAL__STRATEGY=LocalStrategy
+      - APP__HEALTH_ACCESS_KEY=${OPENCTI_HEALTHCHECK_ACCESS_KEY}
+    depends_on:
+      - dragonfly
+      - elasticsearch
+      - rabbitmq
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: ${OPENCTI_BACK_END_REPLICAS}
+      endpoint_mode: dnsrr
   opencti:
     image: opencti/platform:${OPENCTI_VERSION}
     environment:
       - NODE_OPTIONS=--max-old-space-size=8096
-      - APP__PORT=8080
+      - APP__PORT=8071
       - APP__BASE_URL=${OPENCTI_BASE_URL}
       - APP__ADMIN__EMAIL=${OPENCTI_ADMIN_EMAIL}
       - APP__ADMIN__PASSWORD=${OPENCTI_ADMIN_PASSWORD}
@@ -99,10 +140,22 @@ services:
       interval: 10s
       timeout: 5s
       retries: 20
+    deploy:
+      mode: replicated
+      replicas: ${OPENCTI_FRONT_END_REPLICAS}
+      endpoint_mode: dnsrr
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - opencti
+    ports:
+      - "8080:8080"
   worker:
     image: opencti/worker:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-int.:8070
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - WORKER_LOG_LEVEL=info
     depends_on:
@@ -115,7 +168,7 @@ services:
   connector-export-file-stix:
     image: opencti/connector-export-file-stix:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-int.:8070
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_EXPORT_FILE_STIX_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=INTERNAL_EXPORT_FILE
@@ -129,7 +182,7 @@ services:
   connector-export-file-csv:
     image: opencti/connector-export-file-csv:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-int.:8070
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_EXPORT_FILE_CSV_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=INTERNAL_EXPORT_FILE
@@ -143,7 +196,7 @@ services:
   connector-export-file-txt:
     image: opencti/connector-export-file-txt:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-int.:8070
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_EXPORT_FILE_TXT_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=INTERNAL_EXPORT_FILE
@@ -157,7 +210,7 @@ services:
   connector-import-file-stix:
     image: opencti/connector-import-file-stix:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-int.:8070
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_IMPORT_FILE_STIX_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=INTERNAL_IMPORT_FILE
@@ -173,7 +226,7 @@ services:
   connector-import-document:
     image: opencti/connector-import-document:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-int.:8070
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_IMPORT_DOCUMENT_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=INTERNAL_IMPORT_FILE
@@ -206,7 +259,7 @@ services:
   connector-opencti:
     image: opencti/connector-opencti:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-int.:8070
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_OPENCTI_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
@@ -226,7 +279,7 @@ services:
   connector-mitre:
     image: opencti/connector-mitre:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-int.:8070
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_MITRE_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
@@ -247,7 +300,7 @@ services:
   connector-disarm-framework:
     image: opencti/connector-disarm-framework:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-int.:8070
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_DISARM_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
@@ -265,7 +318,7 @@ services:
   connector-cisa-known-exploited-vulnerabilities:
     image: opencti/connector-cisa-known-exploited-vulnerabilities:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-int.:8070
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_CISA_VULNS_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
@@ -284,7 +337,7 @@ services:
   connector-cve:
     image: opencti/connector-cve:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-int.:8070
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_CVE_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
@@ -307,7 +360,7 @@ services:
   connector-malpedia:
     image: opencti/connector-malpedia:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-int.:8070
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_MALPEDIA_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
@@ -328,7 +381,7 @@ services:
   connector-misp-feed-botvrij:
     image: opencti/connector-misp-feed:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-int.:8070
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_MISP_FEED_BOTVRIJ_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
@@ -356,7 +409,7 @@ services:
   connector-misp-feed-circl:
     image: opencti/connector-misp-feed:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-int.:8070
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_MISP_FEED_CIRCL_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
@@ -384,7 +437,7 @@ services:
   connector-misp-feed-threatfox:
     image: opencti/connector-misp-feed:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-int.:8070
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_MISP_FEED_THREATFOX_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
@@ -412,7 +465,7 @@ services:
   connector-misp-feed-digitalside:
     image: opencti/connector-misp-feed:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-int.:8070
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_MISP_FEED_DIGITALSIDE_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
@@ -440,7 +493,7 @@ services:
   connector-misp-feed-cert-fr:
     image: opencti/connector-misp-feed:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-int.:8070
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_MISP_FEED_CERT_FR_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
@@ -468,7 +521,7 @@ services:
   connector-urlhaus:
     image: opencti/connector-urlhaus:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-int.:8070
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_URLHAUS_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
@@ -488,7 +541,7 @@ services:
   connector-valhalla:
     image: opencti/connector-valhalla:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-int.:8070
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_VALHALLA_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
@@ -505,7 +558,7 @@ services:
   connector-vxvault:
     image: opencti/connector-vxvault:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-int.:8070
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_VXVAULT_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
@@ -523,7 +576,7 @@ services:
   connector-export-report-pdf:
     image: opencti/connector-export-report-pdf:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-int.:8070
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_EXPORT_PDF_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=INTERNAL_EXPORT_FILE
@@ -547,7 +600,7 @@ services:
   connector-malware-bazaar-recent-additions:
     image: opencti/connector-malwarebazaar-recent-additions:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-int.:8070
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_MALWARE_BAZAAR_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
@@ -566,7 +619,7 @@ services:
   connector-shodan-internetdb:
     image: opencti/connector-shodan-internetdb:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-int.:8070
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_SHODAN_INTERNETDB_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=INTERNAL_ENRICHMENT
@@ -583,7 +636,7 @@ services:
   connector-hygiene:
     image: opencti/connector-hygiene:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-int.:8070
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_HYGIENE_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=INTERNAL_ENRICHMENT
@@ -600,7 +653,7 @@ services:
   connector-greynoise:
     image: opencti/connector-greynoise:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-int.:8070
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_GREYNOISE_ID}
       - CONNECTOR_TYPE=INTERNAL_ENRICHMENT
@@ -621,7 +674,7 @@ services:
   connector-google-dns:
     image: opencti/connector-google-dns:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-int.:8070
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_GOOGLE_DNS_ID}
       - CONNECTOR_TYPE=INTERNAL_ENRICHMENT
@@ -636,7 +689,7 @@ services:
   connector-shodan:
     image: opencti/connector-shodan:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-int.:8070
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_SHODAN_ID}
       - CONNECTOR_TYPE=INTERNAL_ENRICHMENT
@@ -654,7 +707,7 @@ services:
   connector-abuse-ssl:
     image: opencti/connector-abuse-ssl:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-int.:8070
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_ABUSE_SSL_ID}
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
@@ -671,7 +724,7 @@ services:
   connector-tweetfeed:
     image: opencti/connector-tweetfeed:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-int.:8070
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_TWEETFEED_ID}
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
@@ -693,7 +746,7 @@ services:
   connector-phishunt:
     image: opencti/connector-phishunt:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-int.:8070
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_PHISHUNT_ID}
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
@@ -711,7 +764,7 @@ services:
   connector-yara:
     image: opencti/connector-yara:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-int.:8070
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_YARA_ID}
       - CONNECTOR_TYPE=INTERNAL_ENRICHMENT
@@ -726,7 +779,7 @@ services:
   connector-import-external-reference:
     image: opencti/connector-import-external-reference:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-int.:8070
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_IMPORT_EXTERNAL_REFERENCE_ID}
       - CONNECTOR_TYPE=INTERNAL_ENRICHMENT
@@ -744,7 +797,7 @@ services:
   connector-export-ttps-file-navigator:
     image: opencti/connector-export-ttps-file-navigator:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-int.:8070
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_EXPORT_TTPS_FILE_NAVIGATOR}
       - CONNECTOR_TYPE=INTERNAL_EXPORT_FILE
@@ -758,7 +811,7 @@ services:
   connector-hatching-triage-sandbox-auto:
     image: opencti/connector-hatching-triage-sandbox:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-int.:8070
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=Hatching_Triage_Sandbox_Auto
       - "CONNECTOR_NAME=Hatching Triage Sandbox (Auto)"
@@ -780,7 +833,7 @@ services:
   connector-hatching-triage-sandbox:
     image: opencti/connector-hatching-triage-sandbox:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-int.:8070
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=Hatching_Triage_Sandbox_Manual
       - "CONNECTOR_NAME=Hatching Triage Sandbox (Manual)"
