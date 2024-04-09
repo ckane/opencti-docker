@@ -53,7 +53,7 @@ services:
       interval: 30s
       timeout: 30s
       retries: 3
-  opencti-int:
+  opencti-worker-cluster:
     image: opencti/platform:${OPENCTI_VERSION}
     environment:
       - NODE_OPTIONS=--max-old-space-size=8096
@@ -92,8 +92,58 @@ services:
     restart: always
     deploy:
       mode: replicated
-      replicas: ${OPENCTI_BACK_END_REPLICAS}
+      replicas: ${OPENCTI_WORKER_CLUSTER_REPLICAS}
       endpoint_mode: dnsrr
+    healthcheck:
+      test:  ["CMD", "wget", "-qO-", "http://opencti:8080/health?health_access_key=${OPENCTI_HEALTHCHECK_ACCESS_KEY}"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+  opencti-connector-cluster:
+    image: opencti/platform:${OPENCTI_VERSION}
+    environment:
+      - NODE_OPTIONS=--max-old-space-size=8096
+      - APP__PORT=8072
+      - APP__BASE_URL=${OPENCTI_BASE_URL}
+      - APP__ADMIN__EMAIL=${OPENCTI_ADMIN_EMAIL}
+      - APP__ADMIN__PASSWORD=${OPENCTI_ADMIN_PASSWORD}
+      - APP__ADMIN__TOKEN=${OPENCTI_ADMIN_TOKEN}
+      - APP__APP_LOGS__LOGS_LEVEL=info
+      - REDIS__HOSTNAME=dragonfly
+      - REDIS__PORT=6379
+      - REDIS__TRIMMING=${REDIS_TRIMMING}
+      - ELASTICSEARCH__URL=http://elasticsearch:9200
+      - ELASTICSEARCH__MAX_CONCURRENCY=50
+      - MINIO__ENDPOINT=${S3_ENDPOINT}
+      - MINIO__PORT=443
+      - MINIO__USE_SSL=true
+      - MINIO__USE_AWS_ROLE=true
+      - MINIO__ACCESS_KEY=
+      - MINIO__SECRET_KEY=
+      - MINIO__BUCKET_NAME=${S3_BUCKET}
+      - RABBITMQ__HOSTNAME=rabbitmq
+      - RABBITMQ__PORT=5672
+      - RABBITMQ__PORT_MANAGEMENT=15672
+      - RABBITMQ__MANAGEMENT_SSL=false
+      - RABBITMQ__USERNAME=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ__PASSWORD=${RABBITMQ_DEFAULT_PASS}
+      - SMTP__HOSTNAME=${SMTP_HOSTNAME}
+      - SMTP__PORT=25
+      - PROVIDERS__LOCAL__STRATEGY=LocalStrategy
+    depends_on:
+      - dragonfly
+      - elasticsearch
+      - rabbitmq
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: ${OPENCTI_CONNECTOR_CLUSTER_REPLICAS}
+      endpoint_mode: dnsrr
+    healthcheck:
+      test:  ["CMD", "wget", "-qO-", "http://opencti:8080/health?health_access_key=${OPENCTI_HEALTHCHECK_ACCESS_KEY}"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
   opencti:
     image: opencti/platform:${OPENCTI_VERSION}
     environment:
@@ -156,11 +206,11 @@ services:
   worker:
     image: opencti/worker:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti-int.:8070
+      - OPENCTI_URL=http://opencti-worker-cluster.:8070
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - WORKER_LOG_LEVEL=info
     depends_on:
-      opencti:
+      opencti-worker-cluster:
         condition: service_healthy
     deploy:
       mode: replicated
@@ -169,7 +219,7 @@ services:
   connector-export-file-stix:
     image: opencti/connector-export-file-stix:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti-int.:8070
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_EXPORT_FILE_STIX_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=INTERNAL_EXPORT_FILE
@@ -178,12 +228,12 @@ services:
       - CONNECTOR_LOG_LEVEL=info
     restart: always
     depends_on:
-      opencti:
+      opencti-connector-cluster:
         condition: service_healthy
   connector-export-file-csv:
     image: opencti/connector-export-file-csv:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti-int.:8070
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_EXPORT_FILE_CSV_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=INTERNAL_EXPORT_FILE
@@ -192,12 +242,12 @@ services:
       - CONNECTOR_LOG_LEVEL=info
     restart: always
     depends_on:
-      opencti:
+      opencti-connector-cluster:
         condition: service_healthy
   connector-export-file-txt:
     image: opencti/connector-export-file-txt:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti-int.:8070
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_EXPORT_FILE_TXT_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=INTERNAL_EXPORT_FILE
@@ -206,12 +256,12 @@ services:
       - CONNECTOR_LOG_LEVEL=info
     restart: always
     depends_on:
-      opencti:
+      opencti-connector-cluster:
         condition: service_healthy
   connector-import-file-stix:
     image: opencti/connector-import-file-stix:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti-int.:8070
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_IMPORT_FILE_STIX_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=INTERNAL_IMPORT_FILE
@@ -222,12 +272,12 @@ services:
       - CONNECTOR_LOG_LEVEL=info
     restart: always
     depends_on:
-      opencti:
+      opencti-connector-cluster:
         condition: service_healthy
   connector-import-document:
     image: opencti/connector-import-document:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti-int.:8070
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_IMPORT_DOCUMENT_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=INTERNAL_IMPORT_FILE
@@ -241,7 +291,7 @@ services:
       - IMPORT_DOCUMENT_CREATE_INDICATOR=true
     restart: always
     depends_on:
-      opencti:
+      opencti-connector-cluster:
         condition: service_healthy
   connector-analysis:
     image: opencti/connector-import-document:${OPENCTI_VERSION}
@@ -257,10 +307,14 @@ services:
       - CONNECTOR_ONLY_CONTEXTUAL=false # Only extract data related to an entity (a report, a threat actor, etc.)
       - CONNECTOR_CONFIDENCE_LEVEL=15 # From 0 (Unknown) to 100 (Fully trusted)
       - CONNECTOR_LOG_LEVEL=info
+    restart: always
+    depends_on:
+      opencti-connector-cluster:
+        condition: service_healthy
   connector-opencti:
     image: opencti/connector-opencti:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti-int.:8070
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_OPENCTI_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
@@ -275,12 +329,12 @@ services:
       - CONFIG_INTERVAL=7 # In days, must be strictly greater than 1
     restart: always
     depends_on:
-      opencti:
+      opencti-connector-cluster:
         condition: service_healthy
   connector-mitre:
     image: opencti/connector-mitre:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti-int.:8070
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_MITRE_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
@@ -297,11 +351,12 @@ services:
       - MITRE_INTERVAL=7 # In days, must be strictly greater than 1
     restart: always
     depends_on:
-      - opencti
+      opencti-connector-cluster:
+        condition: service_healthy
   connector-disarm-framework:
     image: opencti/connector-disarm-framework:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti-int.:8070
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_DISARM_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
@@ -315,11 +370,12 @@ services:
       - DISARM_FRAMEWORK_INTERVAL=7 # In days, must be strictly greater than 1
     restart: always
     depends_on:
-      - opencti
+      opencti-connector-cluster:
+        condition: service_healthy
   connector-cisa-known-exploited-vulnerabilities:
     image: opencti/connector-cisa-known-exploited-vulnerabilities:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti-int.:8070
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_CISA_VULNS_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
@@ -334,11 +390,12 @@ services:
       - CISA_INTERVAL=2 # In days, must be strictly greater than 1
     restart: always
     depends_on:
-      - opencti
+      opencti-connector-cluster:
+        condition: service_healthy
   connector-cve:
     image: opencti/connector-cve:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti-int.:8070
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_CVE_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
@@ -357,11 +414,12 @@ services:
       - CVE_API_KEY=${CONNECTOR_CVE_APIKEY}
     restart: always
     depends_on:
-      - opencti
+      opencti-connector-cluster:
+        condition: service_healthy
   connector-malpedia:
     image: opencti/connector-malpedia:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti-int.:8070
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_MALPEDIA_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
@@ -378,11 +436,12 @@ services:
       - MALPEDIA_CREATE_OBSERVABLES=true
     restart: always
     depends_on:
-      - opencti
+      opencti-connector-cluster:
+        condition: service_healthy
   connector-misp-feed-botvrij:
     image: opencti/connector-misp-feed:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti-int.:8070
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_MISP_FEED_BOTVRIJ_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
@@ -406,11 +465,12 @@ services:
       - MISP_FEED_INTERVAL=60 # Required, in minutes
     restart: always
     depends_on:
-      - opencti
+      opencti-connector-cluster:
+        condition: service_healthy
   connector-misp-feed-circl:
     image: opencti/connector-misp-feed:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti-int.:8070
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_MISP_FEED_CIRCL_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
@@ -434,11 +494,12 @@ services:
       - MISP_FEED_INTERVAL=60 # Required, in minutes
     restart: always
     depends_on:
-      - opencti
+      opencti-connector-cluster:
+        condition: service_healthy
   connector-misp-feed-threatfox:
     image: opencti/connector-misp-feed:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti-int.:8070
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_MISP_FEED_THREATFOX_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
@@ -462,11 +523,12 @@ services:
       - MISP_FEED_INTERVAL=60 # Required, in minutes
     restart: always
     depends_on:
-      - opencti
+      opencti-connector-cluster:
+        condition: service_healthy
   connector-misp-feed-digitalside:
     image: opencti/connector-misp-feed:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti-int.:8070
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_MISP_FEED_DIGITALSIDE_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
@@ -490,11 +552,12 @@ services:
       - MISP_FEED_INTERVAL=60 # Required, in minutes
     restart: always
     depends_on:
-      - opencti
+      opencti-connector-cluster:
+        condition: service_healthy
   connector-misp-feed-cert-fr:
     image: opencti/connector-misp-feed:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti-int.:8070
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_MISP_FEED_CERT_FR_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
@@ -518,11 +581,12 @@ services:
       - MISP_FEED_INTERVAL=60 # Required, in minutes
     restart: always
     depends_on:
-      - opencti
+      opencti-connector-cluster:
+        condition: service_healthy
   connector-urlhaus:
     image: opencti/connector-urlhaus:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti-int.:8070
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_URLHAUS_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
@@ -538,11 +602,12 @@ services:
       - URLHAUS_INTERVAL=3 # In days, must be strictly greater than 1
     restart: always
     depends_on:
-      - opencti
+      opencti-connector-cluster:
+        condition: service_healthy
   connector-valhalla:
     image: opencti/connector-valhalla:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti-int.:8070
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_VALHALLA_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
@@ -555,11 +620,12 @@ services:
       - VALHALLA_INTERVAL_SEC=86400 # Run once every day
     restart: always
     depends_on:
-      - opencti
+      opencti-connector-cluster:
+        condition: service_healthy
   connector-vxvault:
     image: opencti/connector-vxvault:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti-int.:8070
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_VXVAULT_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
@@ -573,11 +639,12 @@ services:
       - VXVAULT_INTERVAL=3 # In days, must be strictly greater than 1
     restart: always
     depends_on:
-      - opencti
+      opencti-connector-cluster:
+        condition: service_healthy
   connector-export-report-pdf:
     image: opencti/connector-export-report-pdf:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti-int.:8070
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_EXPORT_PDF_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=INTERNAL_EXPORT_FILE
@@ -597,11 +664,12 @@ services:
       - EXPORT_REPORT_PDF_DEFANG_URLS=false # Replace http in Url observables with hxxp
     restart: always
     depends_on:
-      - opencti
+      opencti-connector-cluster:
+        condition: service_healthy
   connector-malware-bazaar-recent-additions:
     image: opencti/connector-malwarebazaar-recent-additions:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti-int.:8070
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_MALWARE_BAZAAR_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
@@ -616,11 +684,12 @@ services:
       - MALWAREBAZAAR_RECENT_ADDITIONS_LABELS_COLOR=#54483b # Color to use for labels
     restart: always
     depends_on:
-      - opencti
+      opencti-connector-cluster:
+        condition: service_healthy
   connector-shodan-internetdb:
     image: opencti/connector-shodan-internetdb:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti-int.:8070
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_SHODAN_INTERNETDB_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=INTERNAL_ENRICHMENT
@@ -633,11 +702,12 @@ services:
       - SHODAN_SSL_VERIFY=true
     restart: always
     depends_on:
-      - opencti
+      opencti-connector-cluster:
+        condition: service_healthy
   connector-hygiene:
     image: opencti/connector-hygiene:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti-int.:8070
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_HYGIENE_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=INTERNAL_ENRICHMENT
@@ -650,11 +720,12 @@ services:
       - HYGIENE_ENRICH_SUBDOMAINS=false # Enrich subdomains with hygiene_parent label if the parents are found in warninglists
     restart: always
     depends_on:
-      - opencti
+      opencti-connector-cluster:
+        condition: service_healthy
   connector-greynoise:
     image: opencti/connector-greynoise:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti-int.:8070
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_GREYNOISE_ID}
       - CONNECTOR_TYPE=INTERNAL_ENRICHMENT
@@ -671,11 +742,12 @@ services:
       - GREYNOISE_SPOOFABLE_CONFIDENCE_LEVEL=30
     restart: always
     depends_on:
-      - opencti
+      opencti-connector-cluster:
+        condition: service_healthy
   connector-google-dns:
     image: opencti/connector-google-dns:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti-int.:8070
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_GOOGLE_DNS_ID}
       - CONNECTOR_TYPE=INTERNAL_ENRICHMENT
@@ -686,11 +758,12 @@ services:
       - CONNECTOR_LOG_LEVEL=info
     restart: always
     depends_on:
-      - opencti
+      opencti-connector-cluster:
+        condition: service_healthy
   connector-shodan:
     image: opencti/connector-shodan:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti-int.:8070
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_SHODAN_ID}
       - CONNECTOR_TYPE=INTERNAL_ENRICHMENT
@@ -704,11 +777,12 @@ services:
       - SHODAN_CREATE_INDICATORS=true
     restart: always
     depends_on:
-      - opencti
+      opencti-connector-cluster:
+        condition: service_healthy
   connector-abuse-ssl:
     image: opencti/connector-abuse-ssl:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti-int.:8070
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_ABUSE_SSL_ID}
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
@@ -721,11 +795,12 @@ services:
       - ABUSESSL_INTERVAL=10 # Time to wait in minutes between subsequent requests
     restart: always
     depends_on:
-      - opencti
+      opencti-connector-cluster:
+        condition: service_healthy
   connector-tweetfeed:
     image: opencti/connector-tweetfeed:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti-int.:8070
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_TWEETFEED_ID}
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
@@ -743,11 +818,12 @@ services:
       - TWEETFEED_DAYS_BACK_IN_TIME=365 # Number of days to retrieve data back in time
     restart: always
     depends_on:
-      - opencti
+      opencti-connector-cluster:
+        condition: service_healthy
   connector-phishunt:
     image: opencti/connector-phishunt:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti-int.:8070
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_PHISHUNT_ID}
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
@@ -761,11 +837,12 @@ services:
       - PHISHUNT_INTERVAL=3 # In days, must be strictly greater than 1
     restart: always
     depends_on:
-      - opencti
+      opencti-connector-cluster:
+        condition: service_healthy
   connector-yara:
     image: opencti/connector-yara:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti-int.:8070
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_YARA_ID}
       - CONNECTOR_TYPE=INTERNAL_ENRICHMENT
@@ -776,11 +853,12 @@ services:
       - CONNECTOR_LOG_LEVEL=info
     restart: always
     depends_on:
-      - opencti
+      opencti-connector-cluster:
+        condition: service_healthy
   connector-import-external-reference:
     image: opencti/connector-import-external-reference:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti-int.:8070
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_IMPORT_EXTERNAL_REFERENCE_ID}
       - CONNECTOR_TYPE=INTERNAL_ENRICHMENT
@@ -794,11 +872,12 @@ services:
       - IMPORT_EXTERNAL_REFERENCE_IMPORT_PDF_AS_MD=true # If import_as_md is true, try to convert PDF as Markdown
     restart: always
     depends_on:
-      - opencti
+      opencti-connector-cluster:
+        condition: service_healthy
   connector-export-ttps-file-navigator:
     image: opencti/connector-export-ttps-file-navigator:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti-int.:8070
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_EXPORT_TTPS_FILE_NAVIGATOR}
       - CONNECTOR_TYPE=INTERNAL_EXPORT_FILE
@@ -808,11 +887,12 @@ services:
       - CONNECTOR_LOG_LEVEL=error
     restart: always
     depends_on:
-      - opencti
+      opencti-connector-cluster:
+        condition: service_healthy
   connector-hatching-triage-sandbox-auto:
     image: opencti/connector-hatching-triage-sandbox:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti-int.:8070
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=Hatching_Triage_Sandbox_Auto
       - "CONNECTOR_NAME=Hatching Triage Sandbox (Auto)"
@@ -830,11 +910,12 @@ services:
       - HATCHING_TRIAGE_SANDBOX_MAX_TLP=TLP:CLEAR
     restart: always
     depends_on:
-      - opencti
+      opencti-connector-cluster:
+        condition: service_healthy
   connector-hatching-triage-sandbox:
     image: opencti/connector-hatching-triage-sandbox:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti-int.:8070
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=Hatching_Triage_Sandbox_Manual
       - "CONNECTOR_NAME=Hatching Triage Sandbox (Manual)"
@@ -852,7 +933,8 @@ services:
       - HATCHING_TRIAGE_SANDBOX_MAX_TLP=TLP:AMBER
     restart: always
     depends_on:
-      - opencti
+      opencti-connector-cluster:
+        condition: service_healthy
 
 volumes:
   esdata:
