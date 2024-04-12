@@ -163,6 +163,7 @@ services:
     image: nginx:latest
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    restart: always
     depends_on:
       - opencti
     ports:
