@@ -175,7 +175,7 @@ services:
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - WORKER_LOG_LEVEL=info
     depends_on:
-      - opencti
+      - opencti-worker-cluster
     deploy:
       mode: replicated
       replicas: 6
@@ -192,7 +192,7 @@ services:
       - CONNECTOR_LOG_LEVEL=info
     restart: always
     depends_on:
-      - opencti
+      - opencti-connector-cluster
   connector-export-file-csv:
     image: opencti/connector-export-file-csv:${OPENCTI_VERSION}
     environment:
@@ -205,7 +205,7 @@ services:
       - CONNECTOR_LOG_LEVEL=info
     restart: always
     depends_on:
-      - opencti
+      - opencti-connector-cluster
   connector-export-file-txt:
     image: opencti/connector-export-file-txt:${OPENCTI_VERSION}
     environment:
@@ -218,7 +218,7 @@ services:
       - CONNECTOR_LOG_LEVEL=info
     restart: always
     depends_on:
-      - opencti
+      - opencti-connector-cluster
   connector-import-file-stix:
     image: opencti/connector-import-file-stix:${OPENCTI_VERSION}
     environment:
@@ -233,7 +233,7 @@ services:
       - CONNECTOR_LOG_LEVEL=info
     restart: always
     depends_on:
-      - opencti
+      - opencti-connector-cluster
   connector-import-document:
     image: opencti/connector-import-document:${OPENCTI_VERSION}
     environment:
@@ -255,7 +255,7 @@ services:
   connector-analysis:
     image: opencti/connector-import-document:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_ANALYSIS_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=INTERNAL_ANALYSIS
@@ -266,6 +266,7 @@ services:
       - CONNECTOR_ONLY_CONTEXTUAL=false # Only extract data related to an entity (a report, a threat actor, etc.)
       - CONNECTOR_CONFIDENCE_LEVEL=15 # From 0 (Unknown) to 100 (Fully trusted)
       - CONNECTOR_LOG_LEVEL=info
+      - opencti-connector-cluster
   connector-opencti:
     image: opencti/connector-opencti:${OPENCTI_VERSION}
     environment:
@@ -284,7 +285,7 @@ services:
       - CONFIG_INTERVAL=7 # In days, must be strictly greater than 1
     restart: always
     depends_on:
-      - opencti
+      - opencti-connector-cluster
   connector-mitre:
     image: opencti/connector-mitre:${OPENCTI_VERSION}
     environment:
@@ -305,7 +306,7 @@ services:
       - MITRE_INTERVAL=7 # In days, must be strictly greater than 1
     restart: always
     depends_on:
-      - opencti
+      - opencti-connector-cluster
   connector-disarm-framework:
     image: opencti/connector-disarm-framework:${OPENCTI_VERSION}
     environment:
@@ -323,7 +324,7 @@ services:
       - DISARM_FRAMEWORK_INTERVAL=7 # In days, must be strictly greater than 1
     restart: always
     depends_on:
-      - opencti
+      - opencti-connector-cluster
   connector-cisa-known-exploited-vulnerabilities:
     image: opencti/connector-cisa-known-exploited-vulnerabilities:${OPENCTI_VERSION}
     environment:
@@ -342,7 +343,7 @@ services:
       - CISA_INTERVAL=2 # In days, must be strictly greater than 1
     restart: always
     depends_on:
-      - opencti
+      - opencti-connector-cluster
   connector-cve:
     image: opencti/connector-cve:${OPENCTI_VERSION}
     environment:
@@ -365,7 +366,7 @@ services:
       - CVE_API_KEY=${CONNECTOR_CVE_APIKEY}
     restart: always
     depends_on:
-      - opencti
+      - opencti-connector-cluster
   connector-malpedia:
     image: opencti/connector-malpedia:${OPENCTI_VERSION}
     environment:
@@ -386,7 +387,7 @@ services:
       - MALPEDIA_CREATE_OBSERVABLES=true
     restart: always
     depends_on:
-      - opencti
+      - opencti-connector-cluster
   connector-misp-feed-botvrij:
     image: opencti/connector-misp-feed:${OPENCTI_VERSION}
     environment:
@@ -414,7 +415,7 @@ services:
       - MISP_FEED_INTERVAL=60 # Required, in minutes
     restart: always
     depends_on:
-      - opencti
+      - opencti-connector-cluster
   connector-misp-feed-circl:
     image: opencti/connector-misp-feed:${OPENCTI_VERSION}
     environment:
@@ -442,7 +443,7 @@ services:
       - MISP_FEED_INTERVAL=60 # Required, in minutes
     restart: always
     depends_on:
-      - opencti
+      - opencti-connector-cluster
   connector-misp-feed-threatfox:
     image: opencti/connector-misp-feed:${OPENCTI_VERSION}
     environment:
@@ -470,7 +471,7 @@ services:
       - MISP_FEED_INTERVAL=60 # Required, in minutes
     restart: always
     depends_on:
-      - opencti
+      - opencti-connector-cluster
   connector-misp-feed-digitalside:
     image: opencti/connector-misp-feed:${OPENCTI_VERSION}
     environment:
@@ -498,7 +499,7 @@ services:
       - MISP_FEED_INTERVAL=60 # Required, in minutes
     restart: always
     depends_on:
-      - opencti
+      - opencti-connector-cluster
   connector-misp-feed-cert-fr:
     image: opencti/connector-misp-feed:${OPENCTI_VERSION}
     environment:
@@ -526,7 +527,7 @@ services:
       - MISP_FEED_INTERVAL=60 # Required, in minutes
     restart: always
     depends_on:
-      - opencti
+      - opencti-connector-cluster
   connector-urlhaus:
     image: opencti/connector-urlhaus:${OPENCTI_VERSION}
     environment:
@@ -546,7 +547,7 @@ services:
       - URLHAUS_INTERVAL=3 # In days, must be strictly greater than 1
     restart: always
     depends_on:
-      - opencti
+      - opencti-connector-cluster
   connector-valhalla:
     image: opencti/connector-valhalla:${OPENCTI_VERSION}
     environment:
@@ -563,7 +564,7 @@ services:
       - VALHALLA_INTERVAL_SEC=86400 # Run once every day
     restart: always
     depends_on:
-      - opencti
+      - opencti-connector-cluster
   connector-vxvault:
     image: opencti/connector-vxvault:${OPENCTI_VERSION}
     environment:
@@ -581,7 +582,7 @@ services:
       - VXVAULT_INTERVAL=3 # In days, must be strictly greater than 1
     restart: always
     depends_on:
-      - opencti
+      - opencti-connector-cluster
   connector-export-report-pdf:
     image: opencti/connector-export-report-pdf:${OPENCTI_VERSION}
     environment:
@@ -605,7 +606,7 @@ services:
       - EXPORT_REPORT_PDF_DEFANG_URLS=false # Replace http in Url observables with hxxp
     restart: always
     depends_on:
-      - opencti
+      - opencti-connector-cluster
   connector-malware-bazaar-recent-additions:
     image: opencti/connector-malwarebazaar-recent-additions:${OPENCTI_VERSION}
     environment:
@@ -624,7 +625,7 @@ services:
       - MALWAREBAZAAR_RECENT_ADDITIONS_LABELS_COLOR=#54483b # Color to use for labels
     restart: always
     depends_on:
-      - opencti
+      - opencti-connector-cluster
   connector-shodan-internetdb:
     image: opencti/connector-shodan-internetdb:${OPENCTI_VERSION}
     environment:
@@ -641,7 +642,7 @@ services:
       - SHODAN_SSL_VERIFY=true
     restart: always
     depends_on:
-      - opencti
+      - opencti-connector-cluster
   connector-hygiene:
     image: opencti/connector-hygiene:${OPENCTI_VERSION}
     environment:
@@ -658,7 +659,7 @@ services:
       - HYGIENE_ENRICH_SUBDOMAINS=false # Enrich subdomains with hygiene_parent label if the parents are found in warninglists
     restart: always
     depends_on:
-      - opencti
+      - opencti-connector-cluster
   connector-greynoise:
     image: opencti/connector-greynoise:${OPENCTI_VERSION}
     environment:
@@ -679,7 +680,7 @@ services:
       - GREYNOISE_SPOOFABLE_CONFIDENCE_LEVEL=30
     restart: always
     depends_on:
-      - opencti
+      - opencti-connector-cluster
   connector-google-dns:
     image: opencti/connector-google-dns:${OPENCTI_VERSION}
     environment:
@@ -694,7 +695,7 @@ services:
       - CONNECTOR_LOG_LEVEL=info
     restart: always
     depends_on:
-      - opencti
+      - opencti-connector-cluster
   connector-shodan:
     image: opencti/connector-shodan:${OPENCTI_VERSION}
     environment:
@@ -712,7 +713,7 @@ services:
       - SHODAN_CREATE_INDICATORS=true
     restart: always
     depends_on:
-      - opencti
+      - opencti-connector-cluster
   connector-abuse-ssl:
     image: opencti/connector-abuse-ssl:${OPENCTI_VERSION}
     environment:
@@ -729,7 +730,7 @@ services:
       - ABUSESSL_INTERVAL=10 # Time to wait in minutes between subsequent requests
     restart: always
     depends_on:
-      - opencti
+      - opencti-connector-cluster
   connector-tweetfeed:
     image: opencti/connector-tweetfeed:${OPENCTI_VERSION}
     environment:
@@ -751,7 +752,7 @@ services:
       - TWEETFEED_DAYS_BACK_IN_TIME=365 # Number of days to retrieve data back in time
     restart: always
     depends_on:
-      - opencti
+      - opencti-connector-cluster
   connector-phishunt:
     image: opencti/connector-phishunt:${OPENCTI_VERSION}
     environment:
@@ -769,7 +770,7 @@ services:
       - PHISHUNT_INTERVAL=3 # In days, must be strictly greater than 1
     restart: always
     depends_on:
-      - opencti
+      - opencti-connector-cluster
   connector-yara:
     image: opencti/connector-yara:${OPENCTI_VERSION}
     environment:
@@ -784,7 +785,7 @@ services:
       - CONNECTOR_LOG_LEVEL=info
     restart: always
     depends_on:
-      - opencti
+      - opencti-connector-cluster
   connector-import-external-reference:
     image: opencti/connector-import-external-reference:${OPENCTI_VERSION}
     environment:
@@ -802,7 +803,7 @@ services:
       - IMPORT_EXTERNAL_REFERENCE_IMPORT_PDF_AS_MD=true # If import_as_md is true, try to convert PDF as Markdown
     restart: always
     depends_on:
-      - opencti
+      - opencti-connector-cluster
   connector-export-ttps-file-navigator:
     image: opencti/connector-export-ttps-file-navigator:${OPENCTI_VERSION}
     environment:
@@ -816,7 +817,7 @@ services:
       - CONNECTOR_LOG_LEVEL=error
     restart: always
     depends_on:
-      - opencti
+      - opencti-connector-cluster
   connector-hatching-triage-sandbox-auto:
     image: opencti/connector-hatching-triage-sandbox:${OPENCTI_VERSION}
     environment:
@@ -838,7 +839,7 @@ services:
       - HATCHING_TRIAGE_SANDBOX_MAX_TLP=TLP:CLEAR
     restart: always
     depends_on:
-      - opencti
+      - opencti-connector-cluster
   connector-hatching-triage-sandbox:
     image: opencti/connector-hatching-triage-sandbox:${OPENCTI_VERSION}
     environment:
@@ -860,7 +861,7 @@ services:
       - HATCHING_TRIAGE_SANDBOX_MAX_TLP=TLP:AMBER
     restart: always
     depends_on:
-      - opencti
+      - opencti-connector-cluster
 
 volumes:
   esdata:
