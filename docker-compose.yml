@@ -297,7 +297,7 @@ services:
   connector-analysis:
     image: opencti/connector-import-document:${OPENCTI_VERSION}
     environment:
-      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_ANALYSIS_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=INTERNAL_ANALYSIS
