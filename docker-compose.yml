@@ -1,6 +1,6 @@
 services:
   dragonfly:
-    image: docker.dragonflydb.io/dragonflydb/dragonfly:v1.18.0
+    image: docker.dragonflydb.io/dragonflydb/dragonfly:v1.18.1
     restart: always
     command:  --dbfilename dump --port 6379 --logtostderr --keys_output_limit 1000000 --max_client_iobuf_len 104857600 --max_multi_bulk_len 104857600 --snapshot_cron "0 * * * *"
     security_opt:
