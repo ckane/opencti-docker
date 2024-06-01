@@ -19,7 +19,7 @@ services:
   dragonfly:
     image: docker.dragonflydb.io/dragonflydb/dragonfly:v1.18.1
     restart: always
-    command:  --dbfilename dump --port 6379 --logtostderr --keys_output_limit 1000000 --max_client_iobuf_len 104857600 --max_multi_bulk_len 104857600 --snapshot_cron "0 * * * *"
+    command: --dbfilename dump --port 6379 --logtostderr --keys_output_limit 1000000 --max_client_iobuf_len 104857600 --max_multi_bulk_len 104857600 --snapshot_cron "0 * * * *"
     security_opt:
       - "seccomp:unconfined"
     ulimits:
@@ -121,7 +121,13 @@ services:
       replicas: ${OPENCTI_WORKER_CLUSTER_REPLICAS}
       endpoint_mode: dnsrr
     healthcheck:
-      test:  ["CMD", "wget", "-qO-", "http://opencti:8080/health?health_access_key=${OPENCTI_HEALTHCHECK_ACCESS_KEY}"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "-qO-",
+          "http://opencti:8080/health?health_access_key=${OPENCTI_HEALTHCHECK_ACCESS_KEY}",
+        ]
       interval: 10s
       timeout: 5s
       retries: 20
@@ -166,7 +172,13 @@ services:
       replicas: ${OPENCTI_CONNECTOR_CLUSTER_REPLICAS}
       endpoint_mode: dnsrr
     healthcheck:
-      test:  ["CMD", "wget", "-qO-", "http://opencti:8080/health?health_access_key=${OPENCTI_HEALTHCHECK_ACCESS_KEY}"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "-qO-",
+          "http://opencti:8080/health?health_access_key=${OPENCTI_HEALTHCHECK_ACCESS_KEY}",
+        ]
       interval: 10s
       timeout: 5s
       retries: 20
@@ -1005,18 +1017,41 @@ services:
       - ALIENVAULT_TLP=White
       - ALIENVAULT_CREATE_OBSERVABLES=true
       - ALIENVAULT_CREATE_INDICATORS=true
-      - ALIENVAULT_PULSE_START_TIMESTAMP=2023-05-01T00:00:00                  # BEWARE! Could be a lot of pulses!
+      - ALIENVAULT_PULSE_START_TIMESTAMP=2023-05-01T00:00:00 # BEWARE! Could be a lot of pulses!
       - ALIENVAULT_REPORT_TYPE=threat-report
       - ALIENVAULT_REPORT_STATUS=New
-      - ALIENVAULT_GUESS_MALWARE=true                                         # Use tags to guess malware.
-      - ALIENVAULT_GUESS_CVE=true                                             # Use tags to guess CVE.
-      - ALIENVAULT_ENABLE_RELATIONSHIPS=true                                  # Enable/Disable relationship creation between SDOs.
-      - ALIENVAULT_ENABLE_ATTACK_PATTERNS_INDICATES=false                     # Enable/Disable "indicates" relationships between indicators and attack patterns
+      - ALIENVAULT_GUESS_MALWARE=true # Use tags to guess malware.
+      - ALIENVAULT_GUESS_CVE=true # Use tags to guess CVE.
+      - ALIENVAULT_ENABLE_RELATIONSHIPS=true # Enable/Disable relationship creation between SDOs.
+      - ALIENVAULT_ENABLE_ATTACK_PATTERNS_INDICATES=false # Enable/Disable "indicates" relationships between indicators and attack patterns
       - ALIENVAULT_INTERVAL_SEC=1800
     restart: always
     depends_on:
       opencti-connector-cluster:
         condition: service_healthy
+  connector-attribution-tools:
+    image: opencti/connector-attribution-tools:${OPENCTI_VERSION}
+    environment:
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
+      - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
+      - CONNECTOR_ID=${CONNECTOR_ATTRIBUTION_TOOLS_ID}
+      - CONNECTOR_NAME=attribution-tools
+      - CONNECTOR_SCOPE=Incident
+      - CONNECTOR_AUTO=false
+      - CONNECTOR_CONFIDENCE_LEVEL=3
+      - CONNECTOR_LOG_LEVEL=info
+      - ATTRIBUTIONTOOLS_MODEL_TRAINING_CRON_UTC=0 0 * * *
+      - ATTRIBUTIONTOOLS_N_TRAINING_QUERY_THREADS=1
+      - ATTRIBUTIONTOOLS_DEFAULT_RELATION_CONFIDENCE=50
+      - ATTRIBUTIONTOOLS_AUTOMATIC_RELATION_CREATION=false
+      - ATTRIBUTIONTOOLS_RELATION_CREATION_PROBABILITY_TRESHOLD=0.95
+      - ATTRIBUTIONTOOLS_CREATOR_ORG_IDENTITY_ID=${CONNECTOR_ATTRIBUTION_TOOLS_CREATOR_ORG_IDENTITY_ID}
+    restart: always
+    depends_on:
+      opencti-connector-cluster:
+        condition: service_healthy
+    volumes:
+      - attrdata:/data
 
 volumes:
   esdata:
@@ -1024,3 +1059,4 @@ volumes:
   dfdata:
   amqpdata:
   rsakeys:
+  attrdata:
