@@ -97,7 +97,7 @@ services:
       replicas: ${OPENCTI_WORKER_CLUSTER_REPLICAS}
       endpoint_mode: dnsrr
     healthcheck:
-      test:  ["CMD", "wget", "-qO-", "http://opencti:8080/health?health_access_key=${OPENCTI_HEALTHCHECK_ACCESS_KEY}"]
+      test:  ["CMD", "wget", "-qO-", "http://opencti-worker-cluster.:8070/health?health_access_key=${OPENCTI_HEALTHCHECK_ACCESS_KEY}"]
       interval: 10s
       timeout: 5s
       retries: 20
@@ -132,6 +132,7 @@ services:
       - SMTP__HOSTNAME=${SMTP_HOSTNAME}
       - SMTP__PORT=25
       - PROVIDERS__LOCAL__STRATEGY=LocalStrategy
+      - APP__HEALTH_ACCESS_KEY=${OPENCTI_HEALTHCHECK_ACCESS_KEY}
     depends_on:
       - dragonfly
       - elasticsearch
@@ -142,7 +143,7 @@ services:
       replicas: ${OPENCTI_CONNECTOR_CLUSTER_REPLICAS}
       endpoint_mode: dnsrr
     healthcheck:
-      test:  ["CMD", "wget", "-qO-", "http://opencti:8080/health?health_access_key=${OPENCTI_HEALTHCHECK_ACCESS_KEY}"]
+      test:  ["CMD", "wget", "-qO-", "http://opencti-connector-cluster.:8072/health?health_access_key=${OPENCTI_HEALTHCHECK_ACCESS_KEY}"]
       interval: 10s
       timeout: 5s
       retries: 20
@@ -178,8 +179,6 @@ services:
       - SMTP__PORT=25
       - PROVIDERS__LOCAL__STRATEGY=LocalStrategy
       - APP__HEALTH_ACCESS_KEY=${OPENCTI_HEALTHCHECK_ACCESS_KEY}
-    ports:
-      - "8080:8080"
     depends_on:
       dragonfly:
         condition: service_healthy
@@ -189,7 +188,7 @@ services:
         condition: service_healthy
     restart: always
     healthcheck:
-      test:  ["CMD", "wget", "-qO-", "http://opencti:8080/health?health_access_key=${OPENCTI_HEALTHCHECK_ACCESS_KEY}"]
+      test:  ["CMD", "wget", "-qO-", "http://opencti.:8071/health?health_access_key=${OPENCTI_HEALTHCHECK_ACCESS_KEY}"]
       interval: 10s
       timeout: 5s
       retries: 20
