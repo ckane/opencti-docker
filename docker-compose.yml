@@ -288,7 +288,6 @@ services:
       - CONNECTOR_SCOPE=application/pdf,text/plain,text/html
       - CONNECTOR_AUTO=true # Enable/disable auto-import of file
       - CONNECTOR_ONLY_CONTEXTUAL=false # Only extract data related to an entity (a report, a threat actor, etc.)
-      - CONNECTOR_CONFIDENCE_LEVEL=15 # From 0 (Unknown) to 100 (Fully trusted)
       - CONNECTOR_LOG_LEVEL=info
       - IMPORT_DOCUMENT_CREATE_INDICATOR=true
     restart: always
@@ -307,7 +306,6 @@ services:
       - CONNECTOR_SCOPE=application/pdf,text/plain,text/html
       - CONNECTOR_AUTO=true # Enable/disable auto-import of file
       - CONNECTOR_ONLY_CONTEXTUAL=false # Only extract data related to an entity (a report, a threat actor, etc.)
-      - CONNECTOR_CONFIDENCE_LEVEL=15 # From 0 (Unknown) to 100 (Fully trusted)
       - CONNECTOR_LOG_LEVEL=info
     restart: always
     depends_on:
@@ -322,7 +320,6 @@ services:
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
       - CONNECTOR_NAME=OpenCTI
       - CONNECTOR_SCOPE=marking-definition,identity,location
-      - CONNECTOR_CONFIDENCE_LEVEL=90 # From 0 (Unknown) to 100 (Fully trusted)
       - CONNECTOR_UPDATE_EXISTING_DATA=true
       - CONNECTOR_RUN_AND_TERMINATE=false
       - CONNECTOR_LOG_LEVEL=info
@@ -342,7 +339,6 @@ services:
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
       - "CONNECTOR_NAME=MITRE Datasets"
       - CONNECTOR_SCOPE=marking-definition,identity,attack-pattern,course-of-action,intrusion-set,campaign,malware,tool,report,x-mitre-data-component,x-mitre-data-source,external-reference-as-report
-      - CONNECTOR_CONFIDENCE_LEVEL=75 # From 0 (Unknown) to 100 (Fully trusted)
       - CONNECTOR_UPDATE_EXISTING_DATA=true
       - CONNECTOR_RUN_AND_TERMINATE=false
       - CONNECTOR_LOG_LEVEL=info
@@ -364,7 +360,6 @@ services:
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
       - "CONNECTOR_NAME=DISARM Framework"
       - CONNECTOR_SCOPE=marking-definition,identity,attack-pattern,course-of-action,intrusion-set,campaign,malware,tool,report,narrative,event,channel
-      - CONNECTOR_CONFIDENCE_LEVEL=75 # From 0 (Unknown) to 100 (Fully trusted)
       - CONNECTOR_UPDATE_EXISTING_DATA=true
       - CONNECTOR_RUN_AND_TERMINATE=false
       - CONNECTOR_LOG_LEVEL=info
@@ -383,7 +378,6 @@ services:
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
       - "CONNECTOR_NAME=CISA Known Exploited Vulnerabilities"
       - CONNECTOR_SCOPE=identity,infrastructure,vulnerability
-      - CONNECTOR_CONFIDENCE_LEVEL=100 # From 0 (Unknown) to 100 (Fully trusted)
       - CONNECTOR_UPDATE_EXISTING_DATA=true
       - CONNECTOR_RUN_AND_TERMINATE=false
       - CONNECTOR_LOG_LEVEL=info
@@ -403,7 +397,6 @@ services:
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
       - CONNECTOR_NAME=Common Vulnerabilities and Exposures
       - CONNECTOR_SCOPE=identity,vulnerability
-      - CONNECTOR_CONFIDENCE_LEVEL=75 # From 0 (Unknown) to 100 (Fully trusted)
       - CONNECTOR_UPDATE_EXISTING_DATA=true
       - CONNECTOR_RUN_AND_TERMINATE=false
       - CONNECTOR_LOG_LEVEL=info
@@ -427,7 +420,6 @@ services:
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
       - CONNECTOR_NAME=Malpedia
       - CONNECTOR_SCOPE=malpedia
-      - CONNECTOR_CONFIDENCE_LEVEL=30 # From 0 (Unknown) to 100 (Fully trusted)
       - CONNECTOR_UPDATE_EXISTING_DATA=false
       - CONNECTOR_LOG_LEVEL=info
       - MALPEDIA_AUTH_KEY= # Empty key only fetches TLP:WHITE information
@@ -449,7 +441,6 @@ services:
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
       - "CONNECTOR_NAME=MISP Feed (botvrij)"
       - CONNECTOR_SCOPE=misp-feed
-      - CONNECTOR_CONFIDENCE_LEVEL=20 # From 0 (Unknown) to 100 (Fully trusted)
       - CONNECTOR_UPDATE_EXISTING_DATA=false
       - CONNECTOR_RUN_AND_TERMINATE=false
       - CONNECTOR_LOG_LEVEL=info
@@ -478,7 +469,6 @@ services:
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
       - "CONNECTOR_NAME=MISP Feed (CIRCL)"
       - CONNECTOR_SCOPE=misp-feed
-      - CONNECTOR_CONFIDENCE_LEVEL=20 # From 0 (Unknown) to 100 (Fully trusted)
       - CONNECTOR_UPDATE_EXISTING_DATA=false
       - CONNECTOR_RUN_AND_TERMINATE=false
       - CONNECTOR_LOG_LEVEL=info
@@ -507,7 +497,6 @@ services:
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
       - "CONNECTOR_NAME=MISP Feed (ThreatFox)"
       - CONNECTOR_SCOPE=misp-feed
-      - CONNECTOR_CONFIDENCE_LEVEL=20 # From 0 (Unknown) to 100 (Fully trusted)
       - CONNECTOR_UPDATE_EXISTING_DATA=false
       - CONNECTOR_RUN_AND_TERMINATE=false
       - CONNECTOR_LOG_LEVEL=info
@@ -536,7 +525,6 @@ services:
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
       - "CONNECTOR_NAME=MISP Feed (DigitalSide)"
       - CONNECTOR_SCOPE=misp-feed
-      - CONNECTOR_CONFIDENCE_LEVEL=20 # From 0 (Unknown) to 100 (Fully trusted)
       - CONNECTOR_UPDATE_EXISTING_DATA=false
       - CONNECTOR_RUN_AND_TERMINATE=false
       - CONNECTOR_LOG_LEVEL=info
@@ -565,7 +553,6 @@ services:
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
       - "CONNECTOR_NAME=MISP Feed (CERT-FR)"
       - CONNECTOR_SCOPE=misp-feed
-      - CONNECTOR_CONFIDENCE_LEVEL=20 # From 0 (Unknown) to 100 (Fully trusted)
       - CONNECTOR_UPDATE_EXISTING_DATA=false
       - CONNECTOR_RUN_AND_TERMINATE=false
       - CONNECTOR_LOG_LEVEL=info
@@ -594,7 +581,6 @@ services:
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
       - "CONNECTOR_NAME=Abuse.ch URLhaus"
       - CONNECTOR_SCOPE=urlhaus
-      - CONNECTOR_CONFIDENCE_LEVEL=40 # From 0 (Unknown) to 100 (Fully trusted)
       - CONNECTOR_UPDATE_EXISTING_DATA=false
       - CONNECTOR_LOG_LEVEL=info
       - URLHAUS_CSV_URL=https://urlhaus.abuse.ch/downloads/csv_recent/
@@ -615,7 +601,6 @@ services:
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
       - CONNECTOR_NAME=Valhalla
       - CONNECTOR_SCOPE=valhalla
-      - CONNECTOR_CONFIDENCE_LEVEL=50 # From 0 (Unknown) to 100 (Fully trusted)
       - CONNECTOR_UPDATE_EXISTING_DATA=false
       - CONNECTOR_LOG_LEVEL=info
       - VALHALLA_API_KEY= # Empty key only fetches public/demo information
@@ -633,7 +618,6 @@ services:
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
       - "CONNECTOR_NAME=VX Vault URL list"
       - CONNECTOR_SCOPE=vxvault
-      - CONNECTOR_CONFIDENCE_LEVEL=40 # From 0 (Unknown) to 100 (Fully trusted)
       - CONNECTOR_UPDATE_EXISTING_DATA=false
       - CONNECTOR_LOG_LEVEL=info
       - VXVAULT_URL=http://vxvault.net/URL_List.php
@@ -652,7 +636,6 @@ services:
       - CONNECTOR_TYPE=INTERNAL_EXPORT_FILE
       - "CONNECTOR_NAME=Export PDF Report"
       - CONNECTOR_SCOPE=application/pdf
-      - CONNECTOR_CONFIDENCE_LEVEL=100 # From 0 (Unknown) to 100 (Fully trusted)
       - CONNECTOR_LOG_LEVEL=info
       - EXPORT_REPORT_PDF_PRIMARY_COLOR=#ff8c00 # The primary color for the output pdf
       - EXPORT_REPORT_PDF_SECONDARY_COLOR=#000000 # The secondary color for the output pdf
@@ -676,7 +659,6 @@ services:
       - CONNECTOR_ID=${CONNECTOR_MALWARE_BAZAAR_ID} # Valid UUIDv4
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
       - "CONNECTOR_NAME=MalwareBazaar Recent Additions"
-      - CONNECTOR_CONFIDENCE_LEVEL=50 # From 0 (Unknown) to 100 (Fully trusted)
       - CONNECTOR_UPDATE_EXISTING_DATA=false
       - CONNECTOR_LOG_LEVEL=info
       - MALWAREBAZAAR_RECENT_ADDITIONS_API_URL=https://mb-api.abuse.ch/api/v1/
@@ -697,7 +679,6 @@ services:
       - CONNECTOR_TYPE=INTERNAL_ENRICHMENT
       - CONNECTOR_NAME=Shodan InternetDB
       - CONNECTOR_SCOPE=IPv4-Addr
-      - CONNECTOR_CONFIDENCE_LEVEL=75
       - CONNECTOR_AUTO=true
       - CONNECTOR_LOG_LEVEL=info
       - SHODAN_MAX_TLP=white
@@ -716,7 +697,6 @@ services:
       - CONNECTOR_NAME=Hygiene
       - CONNECTOR_SCOPE=IPv4-Addr,IPv6-Addr,Domain-Name,StixFile,Artifact
       - CONNECTOR_AUTO=true
-      - CONNECTOR_CONFIDENCE_LEVEL=15 # From 0 (Unknown) to 100 (Fully trusted)
       - CONNECTOR_LOG_LEVEL=info
       - HYGIENE_WARNINGLISTS_SLOW_SEARCH=false # Enable warning lists slow search mode
       - HYGIENE_ENRICH_SUBDOMAINS=false # Enrich subdomains with hygiene_parent label if the parents are found in warninglists
@@ -734,7 +714,6 @@ services:
       - CONNECTOR_NAME=GreyNoise
       - CONNECTOR_SCOPE=IPv4-Addr
       - CONNECTOR_AUTO=true
-      - CONNECTOR_CONFIDENCE_LEVEL=80 # From 0 (Unknown) to 100 (Fully trusted)
       - CONNECTOR_LOG_LEVEL=info
       - GREYNOISE_KEY=${CONNECTOR_GREYNOISE_APIKEY}
       - GREYNOISE_MAX_TLP=TLP:AMBER
@@ -756,7 +735,6 @@ services:
       - CONNECTOR_NAME=Google DNS
       - CONNECTOR_SCOPE=Domain-Name # MIME type or Stix Object
       - CONNECTOR_AUTO=true
-      - CONNECTOR_CONFIDENCE_LEVEL=100 # From 0 (Unknown) to 100 (Fully trusted)
       - CONNECTOR_LOG_LEVEL=info
     restart: always
     depends_on:
@@ -772,7 +750,6 @@ services:
       - CONNECTOR_NAME=Shodan
       - CONNECTOR_SCOPE=IPv4-Addr
       - CONNECTOR_AUTO=true
-      - CONNECTOR_CONFIDENCE_LEVEL=75 # From 0 (Unknown) to 100 (Fully trusted)
       - CONNECTOR_LOG_LEVEL=info
       - SHODAN_TOKEN=${CONNECTOR_SHODAN_APIKEY}
       - SHODAN_MAX_TLP=TLP:AMBER
@@ -790,7 +767,6 @@ services:
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
       - "CONNECTOR_NAME=Abuse.ch SSL Blacklist"
       - CONNECTOR_SCOPE=abusessl
-      - CONNECTOR_CONFIDENCE_LEVEL=70
       - CONNECTOR_UPDATE_EXISTING_DATA=true
       - CONNECTOR_LOG_LEVEL=info
       - ABUSESSL_URL=https://sslbl.abuse.ch/blacklist/sslipblacklist.csv
@@ -808,7 +784,6 @@ services:
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
       - CONNECTOR_NAME=Tweetfeed
       - CONNECTOR_SCOPE=tweetfeed
-      - CONNECTOR_CONFIDENCE_LEVEL=15
       - CONNECTOR_LOG_LEVEL=info
       - TWEETFEED_CONFIDENCE_LEVEL=15 # From 0 (Unknown) to 100 (Fully trusted)
       - TWEETFEED_CREATE_INDICATORS=true
@@ -831,7 +806,6 @@ services:
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
       - CONNECTOR_NAME=Phishunt
       - CONNECTOR_SCOPE=phishunt
-      - CONNECTOR_CONFIDENCE_LEVEL=40 # From 0 (Unknown) to 100 (Fully trusted)
       - CONNECTOR_UPDATE_EXISTING_DATA=false
       - CONNECTOR_LOG_LEVEL=info
       - PHISHUNT_URL=https://phishunt.io/feed.txt
@@ -851,7 +825,6 @@ services:
       - CONNECTOR_NAME=YARA
       - CONNECTOR_SCOPE=Artifact # MIME type or Stix Object
       - CONNECTOR_AUTO=true
-      - CONNECTOR_CONFIDENCE_LEVEL=100 # From 0 (Unknown) to 100 (Fully trusted)
       - CONNECTOR_LOG_LEVEL=info
     restart: always
     depends_on:
@@ -867,7 +840,6 @@ services:
       - CONNECTOR_NAME=ImportExternalReference
       - CONNECTOR_SCOPE=External-Reference
       - CONNECTOR_AUTO=false # Enable/disable auto-import of external references
-      - CONNECTOR_CONFIDENCE_LEVEL=15 # From 0 (Unknown) to 100 (Fully trusted)
       - CONNECTOR_LOG_LEVEL=info
       - IMPORT_EXTERNAL_REFERENCE_IMPORT_AS_PDF=true # Import as PDF file
       - IMPORT_EXTERNAL_REFERENCE_IMPORT_AS_MD=true # Import as MarkDown file
@@ -885,7 +857,6 @@ services:
       - CONNECTOR_TYPE=INTERNAL_EXPORT_FILE
       - CONNECTOR_NAME=ExportTTPsFileNavigator
       - CONNECTOR_SCOPE=application/vnd.mitre.navigator+json
-      - CONNECTOR_CONFIDENCE_LEVEL=100 # From 0 (Unknown) to 100 (Fully trusted)
       - CONNECTOR_LOG_LEVEL=error
     restart: always
     depends_on:
@@ -900,7 +871,6 @@ services:
       - "CONNECTOR_NAME=Hatching Triage Sandbox (Auto)"
       - CONNECTOR_SCOPE=Artifact
       - CONNECTOR_AUTO=true # Enable/disable auto-enrichment of observables
-      - CONNECTOR_CONFIDENCE_LEVEL=50 # From 0 (Unknown) to 100 (Fully trusted)
       - CONNECTOR_LOG_LEVEL=info
       - HATCHING_TRIAGE_SANDBOX_BASE_URL=https://tria.ge/api # Public URL, see https://tria.ge/docs/
       - HATCHING_TRIAGE_SANDBOX_TOKEN=${CONNECTOR_HATCHING_TRIAGE_SANDBOX_TOKEN}
@@ -923,7 +893,6 @@ services:
       - "CONNECTOR_NAME=Hatching Triage Sandbox (Manual)"
       - CONNECTOR_SCOPE=Artifact
       - CONNECTOR_AUTO=false # Enable/disable auto-enrichment of observables
-      - CONNECTOR_CONFIDENCE_LEVEL=50 # From 0 (Unknown) to 100 (Fully trusted)
       - CONNECTOR_LOG_LEVEL=info
       - HATCHING_TRIAGE_SANDBOX_BASE_URL=https://tria.ge/api # Public URL, see https://tria.ge/docs/
       - HATCHING_TRIAGE_SANDBOX_TOKEN=${CONNECTOR_HATCHING_TRIAGE_SANDBOX_TOKEN}
@@ -945,7 +914,6 @@ services:
       - CONNECTOR_ID=${CONNECTOR_ALIENVAULT_ID}
       - CONNECTOR_NAME=AlienVault
       - CONNECTOR_SCOPE=alienvault
-      - CONNECTOR_CONFIDENCE_LEVEL=15 # From 0 (Unknown) to 100 (Fully trusted)
       - CONNECTOR_LOG_LEVEL=info
       - ALIENVAULT_BASE_URL=https://otx.alienvault.com
       - ALIENVAULT_API_KEY=${CONNECTOR_ALIENVAULT_APIKEY}
@@ -973,7 +941,6 @@ services:
       - CONNECTOR_NAME=attribution-tools
       - CONNECTOR_SCOPE=Incident
       - CONNECTOR_AUTO=false
-      - CONNECTOR_CONFIDENCE_LEVEL=3
       - CONNECTOR_LOG_LEVEL=info
       - ATTRIBUTIONTOOLS_MODEL_TRAINING_CRON_UTC=0 0 * * *
       - ATTRIBUTIONTOOLS_N_TRAINING_QUERY_THREADS=1
