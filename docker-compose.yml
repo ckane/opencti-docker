@@ -88,9 +88,14 @@ services:
       - PROVIDERS__LOCAL__STRATEGY=LocalStrategy
       - APP__HEALTH_ACCESS_KEY=${OPENCTI_HEALTHCHECK_ACCESS_KEY}
     depends_on:
-      - dragonfly
-      - elasticsearch
-      - rabbitmq
+      dragonfly:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      opencti-connector-cluster:
+        condition: service_healthy
     restart: always
     deploy:
       mode: replicated
@@ -134,9 +139,12 @@ services:
       - PROVIDERS__LOCAL__STRATEGY=LocalStrategy
       - APP__HEALTH_ACCESS_KEY=${OPENCTI_HEALTHCHECK_ACCESS_KEY}
     depends_on:
-      - dragonfly
-      - elasticsearch
-      - rabbitmq
+      dragonfly:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     restart: always
     deploy:
       mode: replicated
@@ -185,6 +193,8 @@ services:
       elasticsearch:
         condition: service_healthy
       rabbitmq:
+        condition: service_healthy
+      opencti-connector-cluster:
         condition: service_healthy
     restart: always
     healthcheck:
