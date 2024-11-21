@@ -1012,6 +1012,22 @@ services:
         condition: service_healthy
     volumes:
       - attrdata:/data
+  connector-first-epss:
+    image: opencti/connector-first-epss:6.4.1
+    environment:
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
+      - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
+      - CONNECTOR_ID=${CONNECTOR_FIRST_EPSS_ID}
+      - "CONNECTOR_NAME=FIRST EPSS"
+      - CONNECTOR_SCOPE=vulnerability
+      - CONNECTOR_LOG_LEVEL=error
+      - CONNECTOR_AUTO=true
+      - FIRST_EPSS_API_BASE_URL=https://api.first.org/data/v1/epss
+      - FIRST_EPSS_MAX_TLP=TLP:CLEAR # Available values: TLP:CLEAR, TLP:WHITE, TLP:GREEN, TLP:AMBER, TLP:AMBER+STRICT, TLP:RED
+    restart: always
+    depends_on:
+      opencti-connector-cluster:
+        condition: service_healthy
 
 volumes:
   esdata:
