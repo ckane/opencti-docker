@@ -17,7 +17,7 @@ services:
       retries: 3
     restart: always
   dragonfly:
-    image: docker.dragonflydb.io/dragonflydb/dragonfly:v1.25.2
+    image: docker.dragonflydb.io/dragonflydb/dragonfly:v1.25.4
     restart: always
     command: --dbfilename dump --port 6379 --logtostderr --keys_output_limit 1000000 --max_client_iobuf_len 104857600 --max_multi_bulk_len 104857600 --snapshot_cron "0 * * * *"
     security_opt:
