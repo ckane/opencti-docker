@@ -42,7 +42,8 @@ services:
       # - cluster.name=docker-cluster
       - xpack.ml.enabled=false
       - xpack.security.enabled=false
-      - thread_pool.search.queue_size=5000
+      - thread_pool.search.queue_size=10000
+      - thread_pool.search.size=32
       - logger.org.elasticsearch.discovery="ERROR"
       - "ES_JAVA_OPTS=-Xms${ELASTIC_MEMORY_SIZE} -Xmx${ELASTIC_MEMORY_SIZE}"
     restart: always
