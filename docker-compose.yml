@@ -1029,6 +1029,34 @@ services:
     depends_on:
       opencti-connector-cluster:
         condition: service_healthy
+  connector-wiz:
+    image: opencti/connector-wiz:6.6.9
+    environment:
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
+      - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
+      - CONNECTOR_ID=${CONNECTOR_WIZ}
+      - CONNECTOR_NAME=Wiz Cloud Threat LandScape
+      - CONNECTOR_SCOPE=wiz
+      - CONNECTOR_LOG_LEVEL=error
+      - CONNECTOR_DURATION_PERIOD=P1D # ISO8601 format in String, start with 'P...' for Period
+      - WIZ_THREAT_ACTOR_AS_INTRUSION_SET=True
+      - WIZ_TLP_LEVEL=clear
+      # Connector's definition parameters OPTIONAL
+      # - CONNECTOR_QUEUE_THRESHOLD=500 # Default 500Mo, Float accepted
+      # - CONNECTOR_RUN_AND_TERMINATE=False # Default False, True run connector once
+      # - CONNECTOR_SEND_TO_QUEUE=True # Default True
+      # - CONNECTOR_SEND_TO_DIRECTORY=False # Default False
+      # - CONNECTOR_SEND_TO_DIRECTORY_PATH=CHANGEME # if CONNECTOR_SEND_TO_DIRECTORY is True, you must specify a path
+      # - CONNECTOR_SEND_TO_DIRECTORY_RETENTION=7 # Default 7, in days
+
+      # Add proxy parameters below if needed
+      # - HTTP_PROXY=CHANGEME
+      # - HTTPS_PROXY=CHANGEME
+      # - NO_PROXY=CHANGEME
+    restart: always
+    depends_on:
+      opencti-connector-cluster:
+        condition: service_healthy
 
 volumes:
   esdata:
