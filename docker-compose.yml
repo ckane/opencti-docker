@@ -1057,6 +1057,22 @@ services:
     depends_on:
       opencti-connector-cluster:
         condition: service_healthy
+  connector-mitre-atlas:
+    image: opencti/connector-mitre-atlas:${OPENCTI_VERSION}
+    environment:
+      - OPENCTI_URL=http://opencti-connector-cluster.:8072
+      - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
+      - CONNECTOR_ID=${CONNECTOR_MITRE_ATLAS_ID}
+      - "CONNECTOR_NAME=MITRE ATLAS"
+      - CONNECTOR_SCOPE=identity,attack-pattern,course-of-action,relationship,x-mitre-collection,x-mitre-matrix,x-mitre-tactic
+      - CONNECTOR_RUN_AND_TERMINATE=false
+      - CONNECTOR_LOG_LEVEL=error
+      - MITRE_ATLAS_URL=https://raw.githubusercontent.com/mitre-atlas/atlas-navigator-data/main/dist/stix-atlas.json
+      - MITRE_ATLAS_INTERVAL=7 # In days, must be strictly greater than 1
+    restart: always
+    depends_on:
+      opencti-connector-cluster:
+        condition: service_healthy
 
 volumes:
   esdata:
