@@ -1014,7 +1014,7 @@ services:
     volumes:
       - attrdata:/data
   connector-first-epss:
-    image: opencti/connector-first-epss:6.4.1
+    image: opencti/connector-first-epss:${OPENCTI_VERSION}
     environment:
       - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
