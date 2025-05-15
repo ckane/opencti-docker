@@ -1030,11 +1030,11 @@ services:
       opencti-connector-cluster:
         condition: service_healthy
   connector-wiz:
-    image: opencti/connector-wiz:6.6.9
+    image: opencti/connector-wiz:${OPENCTI_VERSION}
     environment:
       - OPENCTI_URL=http://opencti-connector-cluster.:8072
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
-      - CONNECTOR_ID=${CONNECTOR_WIZ}
+      - CONNECTOR_ID=${CONNECTOR_WIZ_ID}
       - CONNECTOR_NAME=Wiz Cloud Threat LandScape
       - CONNECTOR_SCOPE=wiz
       - CONNECTOR_LOG_LEVEL=error
